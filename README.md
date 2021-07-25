@@ -1,5 +1,8 @@
-# Eng_ScrewV
-## Calculates steel connections with screws
+# Eng_ScrewV  
+## Calculates steel connections with screws  
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/OlimilO1402/Eng_ScrewV?style=plastic)](https://github.com/OlimilO1402/Eng_ScrewV/releases/latest)
+[![Github All Releases](https://img.shields.io/github/downloads/OlimilO1402/Eng_ScrewV/Eng_ScrewV.zip)](https://github.com/OlimilO1402/Eng_ScrewV/Eng_ScrewV.zip)  
+
 Beside the file ScrewV.exe you need the following additional files:
 * DirectCOM.dll
 * vb_cairo_sqlite.dll
