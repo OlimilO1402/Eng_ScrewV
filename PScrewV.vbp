@@ -1,5 +1,5 @@
 Type=Exe
-Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\Windows\SysWOW64\stdole2.tlb#OLE Automation
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#C:\WINDOWS\SysWow64\stdole2.tlb#OLE Automation
 Reference=*\G{C79C91A4-10F5-4F71-A490-3B7915514344}#2.5#0#C:\VBControls\RC5\vbRichClient5.dll#vbRichClient5
 Form=Forms\Form1.frm
 Form=Forms\frmAbout.frm
