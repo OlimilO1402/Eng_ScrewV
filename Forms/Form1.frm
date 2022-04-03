@@ -760,6 +760,13 @@ Option Explicit
 'dient als doc:
 Private m_SVFL As SchrVerbFL
 
+
+'om 2022-04-03 wenn die Option Schraubengruppe ausgeschaltet wird
+'dann zuerst Schraubengruppe und Bleche hier sichern
+Private m_SGr_old As Schraubengruppe
+Private m_BlL_old As Blech
+Private m_BlR_old As Blech
+
 Private bInitText As Boolean
 Private PbCanvas  As CairoPicBox
 Private isUpdating As Boolean
@@ -913,7 +920,7 @@ Private Sub CkZange_Click()
     If isUpdating Then Exit Sub
     m_SVFL.BlechLinks.IsZange = CkZange.Value = vbChecked
     m_SVFL.BlechLinks.IsMehrschnittig = CkZange.Value = vbChecked
-    m_SVFL.BlechLinks.IsMehrschnittig = CkZange.Value = vbChecked
+    'm_SVFL.BlechLinks.IsMehrschnittig = CkZange.Value = vbChecked
     
     'If Not m_br Is Nothing Then m_br.IsMehrschnittig = True
     'CalcSchraubenlänge
@@ -1131,7 +1138,6 @@ Private Sub UpdateView()
                 TxLZ.Enabled = Not (.Schraubenliste.N2 = 1#)
             End With
             Dim bl As Blech: Set bl = m_SVFL.BlechLinks
-            PnlBL_Enabled = (Not bl Is Nothing)
             If Not bl Is Nothing Then
                 With bl
                     TxBLt.Text = .Blechdicke
@@ -1142,7 +1148,6 @@ Private Sub UpdateView()
                 End With
             End If
             Dim br As Blech: Set br = m_SVFL.BlechRechts
-            PnlBR_Enabled = (Not br Is Nothing)
             If Not br Is Nothing Then
                 With br
                     TxBRt.Text = .Blechdicke
@@ -1153,6 +1158,9 @@ Private Sub UpdateView()
             End If
             PnlAbstLR_Enabled = (Not bl Is Nothing) Or (Not br Is Nothing)
         End If
+        PnlBR_Enabled = (Not br Is Nothing)
+        PnlBL_Enabled = (Not bl Is Nothing)
+        
         Dim nw As SchraubenNachweis: Set nw = m_SVFL.SchraubenNachweis
         With nw
             sb.AppendNL .ToStr '.ToListBox LBSchraube
@@ -1218,14 +1226,18 @@ Sub CreateSchraubenGruppe()
     End With
 End Sub
 Sub CreateBlechL()
+    'If m_SVFL Is Nothing Then Exit Sub
     With m_SVFL
         Set .BlechLinks = IIf(CkBBeamLeft.Value = vbChecked, MNew.Blech(.Norm, S235, 10, 0, 100, True, False, False), Nothing)
+        If .Schraubengruppe Is Nothing Then Exit Sub
         Set .Schraubengruppe.TrägerLinks = .BlechLinks
     End With
 End Sub
 Sub CreateBlechR()
+    'If m_SVFL Is Nothing Then Exit Sub
     With m_SVFL
         Set .BlechRechts = IIf(CkBBeamRight.Value = vbChecked, MNew.Blech(.Norm, S235, 10, 0, 100, False, False, False), Nothing)
+        If .Schraubengruppe Is Nothing Then Exit Sub
         Set .Schraubengruppe.TrägerRechts = m_SVFL.BlechRechts
     End With
 End Sub
@@ -1420,12 +1432,27 @@ Private Sub CkBBoltGroup_Click()
     With m_SVFL
         If isUpdating Then Exit Sub
         If Not CkBBoltGroup.Value = vbChecked Then
+            'Schraubengruppe vorher sichern!
+            'und bei Checked wieder die gleichen Einstellungen herstellen
+            Set m_SGr_old = .Schraubengruppe
+            Set m_BlL_old = .BlechLinks
+            Set m_BlR_old = .BlechRechts
+            
             Set .Schraubengruppe = Nothing
-            Set .BlechLinks = Nothing: CkBBeamLeft.Value = vbUnchecked
-            Set .BlechRechts = Nothing: CkBBeamRight.Value = vbUnchecked
+            Set .BlechLinks = Nothing:  'CkBBeamLeft.Value = vbUnchecked
+            Set .BlechRechts = Nothing: 'CkBBeamRight.Value = vbUnchecked
         Else
-            Call CreateEd
-            Call CreateSchraubenGruppe
+            If m_SGr_old Is Nothing Then
+                Call CreateEd
+                Call CreateSchraubenGruppe
+            Else
+                Set .Schraubengruppe = m_SGr_old
+                Set .BlechLinks = m_BlL_old
+                Set .BlechRechts = m_BlR_old
+                
+                'CkBBeamLeft.Value = vbChecked
+                'CkBBeamRight.Value = vbChecked
+            End If
         End If
     End With
     UpdateView
@@ -1455,7 +1482,7 @@ Private Property Let PnlBL_Enabled(ByVal ben As Boolean)
     LbBLh.Enabled = ben: TxBLh.Enabled = ben
     LbBLt.Enabled = ben: TxBLt.Enabled = ben
     LbBLS.Enabled = ben: CBBLStahl.Enabled = ben
-    CkZange.Enabled = CkBBeamLeft.Value = vbChecked And CkBBeamRight.Value = vbChecked
+    CkZange.Enabled = ben 'CkBBeamLeft.Value = vbChecked And CkBBeamRight.Value = vbChecked
 End Property
 Private Property Let PnlBR_Enabled(ByVal ben As Boolean)
     LbBRh.Enabled = ben: TxBRh.Enabled = ben
