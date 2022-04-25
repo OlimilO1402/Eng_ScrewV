@@ -19,7 +19,12 @@ Option Explicit
 Private m_N As Norm 'DIN18800 oder EuroCode 3
 Private m_d As Double   ' Schraubendurchmesser in [mm] normalerweise nur ganze Millimeter
                         ' => Byte müßte reichen
+'Die Gewindeart metrisch, oder anders ist frei, hier haben wir nur Metrisches Gewinde
+'Der Gewindetyp Normalgewinde bzw Regelgewinde oder Feingewinde
+'
 Private m_l As Double   'die Klemmlänge, daraus ergibt sich die erforderliche Schraubenlänge
+                        'die Klemmlänge ergibt sich aus den Blechen, woher weiß die Schraube von den Blechdicken?
+                        
 Private m_g As Double   ' Schraubengüte 4.6, 5.6, 8.8, 10.9, was gibbet no?
                         ' 4.8, 5.8, 6.8: in D nicht zugelassen
                         ' aka SFK = SchraubenFestigkeitsKlasse

@@ -33,6 +33,7 @@ Class=List2DOfSGScrew; Classes\List2DOfSGScrew.cls
 Class=NormDIN18800; Classes\NormDIN18800.cls
 Class=NormEuroCode3; Classes\NormEuroCode3.cls
 ResFile32="Resources\MyRes.res"
+Class=SchraubenGewinde; Classes\SchraubenGewinde.cls
 IconForm="frmSchrauben"
 Startup="Sub Main"
 HelpFile=""
