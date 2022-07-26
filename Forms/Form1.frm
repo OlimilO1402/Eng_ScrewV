@@ -652,13 +652,12 @@ Begin VB.Form frmSchrauben
       Width           =   855
    End
    Begin VB.Label Label4 
-      AutoSize        =   -1  'True
       Caption         =   "Norm"
       Height          =   195
       Left            =   120
       TabIndex        =   65
       Top             =   120
-      Width           =   375
+      Width           =   975
    End
    Begin VB.Label Label3 
       AutoSize        =   -1  'True
