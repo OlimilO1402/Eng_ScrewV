@@ -1,14 +1,14 @@
 VERSION 5.00
 Begin VB.Form frmSchrauben 
    Caption         =   "Form1"
-   ClientHeight    =   13935
+   ClientHeight    =   11670
    ClientLeft      =   450
    ClientTop       =   1095
-   ClientWidth     =   14355
+   ClientWidth     =   18000
    Icon            =   "Form1.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   13935
-   ScaleWidth      =   14355
+   ScaleHeight     =   11670
+   ScaleWidth      =   18000
    Begin VB.ListBox LBSchraube 
       BeginProperty Font 
          Name            =   "Courier New"
@@ -58,7 +58,7 @@ Begin VB.Form frmSchrauben
       Height          =   285
       Left            =   960
       TabIndex        =   41
-      Top             =   10800
+      Top             =   11280
       Width           =   855
    End
    Begin VB.TextBox TxOffZ 
@@ -66,7 +66,7 @@ Begin VB.Form frmSchrauben
       Height          =   285
       Left            =   1920
       TabIndex        =   42
-      Top             =   10800
+      Top             =   11280
       Width           =   855
    End
    Begin VB.CheckBox CkPdfQuer 
@@ -82,7 +82,7 @@ Begin VB.Form frmSchrauben
       Height          =   285
       Left            =   1920
       TabIndex        =   40
-      Top             =   10440
+      Top             =   10920
       Width           =   855
    End
    Begin VB.TextBox TxQuerkraftEd 
@@ -90,7 +90,7 @@ Begin VB.Form frmSchrauben
       Height          =   285
       Left            =   1920
       TabIndex        =   39
-      Top             =   10080
+      Top             =   10560
       Width           =   855
    End
    Begin VB.TextBox TxMomentEd 
@@ -98,7 +98,7 @@ Begin VB.Form frmSchrauben
       Height          =   285
       Left            =   1920
       TabIndex        =   38
-      Top             =   9720
+      Top             =   10200
       Width           =   855
    End
    Begin VB.ComboBox CbZoom 
@@ -603,12 +603,21 @@ Begin VB.Form frmSchrauben
       Top             =   480
       Width           =   6615
    End
+   Begin VB.Label Label6 
+      AutoSize        =   -1  'True
+      Caption         =   "Bemessungswerte:"
+      Height          =   195
+      Left            =   120
+      TabIndex        =   79
+      Top             =   9840
+      Width           =   1335
+   End
    Begin VB.Label Label10 
       Caption         =   "Offset x,z"
       Height          =   255
       Left            =   120
       TabIndex        =   77
-      Top             =   10800
+      Top             =   11280
       Width           =   735
    End
    Begin VB.Label Label9 
@@ -616,7 +625,7 @@ Begin VB.Form frmSchrauben
       Height          =   255
       Left            =   120
       TabIndex        =   71
-      Top             =   10440
+      Top             =   10920
       Width           =   1575
    End
    Begin VB.Label Label8 
@@ -624,7 +633,7 @@ Begin VB.Form frmSchrauben
       Height          =   255
       Left            =   120
       TabIndex        =   70
-      Top             =   10080
+      Top             =   10560
       Width           =   1575
    End
    Begin VB.Label Label7 
@@ -632,7 +641,7 @@ Begin VB.Form frmSchrauben
       Height          =   255
       Left            =   120
       TabIndex        =   69
-      Top             =   9720
+      Top             =   10200
       Width           =   1575
    End
    Begin VB.Label LbZoom 
@@ -985,6 +994,7 @@ Private Sub mnuFileBsp4_Click()
 End Sub
 
 Private Sub mnuFileExpResGrf_Click()
+'Try: On Error GoTo Catch
     Dim pdf As CairoPdfDoc: Set pdf = MNew.CairoPdfDoc(MMain.Cairo, IIf(CkPdfQuer.Value = vbChecked, poLandscape, poPortrait), pfDIN_A4, PbCanvas.ZoomFactor)
     'Dim t As Double: t = MCDraw.PixProMM
     'MCDraw.PixProMM = pdf.PunkteProMM
@@ -997,12 +1007,36 @@ Private Sub mnuFileExpResGrf_Click()
     Dim Flt As String: Flt = "pdf Ergebnisse Grafik|*.pdf|Alle Dateien|*.*"
     Dim FNm As String: FNm = m_FSO.ShowSaveDialog(, DefDir, , "XScrew.xsx", Flt, "XSx", Me.hwnd)
     If StrPtr(FNm) Then
-        pdf.WriteToFile FNm
+        TryWriteToPdfFile pdf, FNm
     End If
     'MCDraw.PixProMM = t
-
+'    GoTo Finally
+'Catch:
+'    If Err <> 0 Then
+'
+'    End If
+'Finally:
 End Sub
 
+Private Sub TryWriteToPdfFile(pdf As CairoPdfDoc, aFNm As String)
+Try: On Error GoTo Catch
+    pdf.WriteToFile aFNm
+    GoTo Finally
+Catch:
+    'Select Case Err.Number
+    'Case &H80070020
+    If Err Then
+        'Laufzeitfehler‘-2147024864 (80070020)‘: Automatisierungsfehler
+        'Der Prozess kann nicht auf die Datei zugreifen, da sie von einem anderen Prozess verwendet wird.
+        If ErrHandler("TryWriteToPdfFile", "Trying to open the file: " & aFNm, , , , , True) = vbRetry Then
+            Resume Try
+        End If
+    End If
+    'Case Else:
+        '
+    'End Select
+Finally:
+End Sub
 Private Sub mnuFileOpen_Click()
     'den Datei-Öffnen-Dialog anzeigen
     If m_FSO Is Nothing Then Set m_FSO = New_c.FSO
@@ -1805,4 +1839,29 @@ End Sub
 '    Me.Hide
 '    'Unload Me
 'End Sub
+
+'copy this same function to every class, form or module
+'the name of the class or form will be added automatically
+'in standard-modules the function "TypeName(Me)" will not work, so simply replace it with the name of the Module
+' v ############################## v '   Local ErrHandler   ' v ############################## v '
+Private Function ErrHandler(ByVal FuncName As String, _
+                            Optional ByVal AddInfo As String, _
+                            Optional WinApiError, _
+                            Optional bLoud As Boolean = True, _
+                            Optional bErrLog As Boolean = True, _
+                            Optional vbDecor As VbMsgBoxStyle = vbOKCancel, _
+                            Optional bRetry As Boolean) As VbMsgBoxResult
+
+    If bRetry Then
+
+        ErrHandler = MessErrorRetry(TypeName(Me), FuncName, AddInfo, WinApiError, bErrLog)
+
+    Else
+
+        ErrHandler = MessError(TypeName(Me), FuncName, AddInfo, WinApiError, bLoud, bErrLog, vbDecor)
+
+    End If
+
+End Function
+
 
